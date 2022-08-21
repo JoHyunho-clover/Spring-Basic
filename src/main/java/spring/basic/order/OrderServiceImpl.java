@@ -1,10 +1,13 @@
 package spring.basic.order;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import spring.basic.discount.DiscountPolicy;
 import spring.basic.discount.FixDiscountPolicy;
 import spring.basic.discount.RateDiscountPolicy;
 import spring.basic.member.*;
 
+@Component
 public class OrderServiceImpl implements OrderService{
 
     /*
@@ -20,6 +23,7 @@ public class OrderServiceImpl implements OrderService{
     private final MemberRepository memberRepository; //DIP원칙을 지키며, DI 적용 - 해당 인터페이스를 구현한 구현체 중 아무거나 들어와도 된다. 이렇게 됨으로써 유연한 변경이 가능해짐
     private final DiscountPolicy discountPolicy;
 
+    @Autowired //안붙여도 되긴해 왜냐하면 생성자가 하나라서
     public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) { //이것으로 SRP 원칙 지키게 된다. (책임 분리)
         this.memberRepository = memberRepository;
         this.discountPolicy = discountPolicy;
@@ -30,5 +34,10 @@ public class OrderServiceImpl implements OrderService{
         Member member=memberRepository.findById(memberId);
         int discountPrice = discountPolicy.discount(member,itemPrice);
         return new Order(memberId,itemName,itemPrice,discountPrice);
+    }
+
+    //테스트 용도
+    public MemberRepository getMemberRepository() {
+        return memberRepository;
     }
 }
