@@ -1,6 +1,8 @@
 package spring.basic.order;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import spring.basic.discount.DiscountPolicy;
 import spring.basic.discount.FixDiscountPolicy;
@@ -8,6 +10,7 @@ import spring.basic.discount.RateDiscountPolicy;
 import spring.basic.member.*;
 
 @Component
+// @RequiredArgsConstructor // - Qualifier적용으로 주석처리하게됨
 public class OrderServiceImpl implements OrderService{
 
     /*
@@ -21,9 +24,26 @@ public class OrderServiceImpl implements OrderService{
     */
 
     private final MemberRepository memberRepository; //DIP원칙을 지키며, DI 적용 - 해당 인터페이스를 구현한 구현체 중 아무거나 들어와도 된다. 이렇게 됨으로써 유연한 변경이 가능해짐
+    //private final DiscountPolicy rateDiscountPolicy; // discountPolicy ->  rateDiscountPolicy //Autowired할 때 같은 타입의 빈이 2개 일때 발생하는 오류로 사용하는 방법중 2번째 방법
     private final DiscountPolicy discountPolicy;
 
+    /* final이 붙은 필드들을 모아서 생성자를 자동으로 만들어주는 @RequiredArgsConstructor를 사용하면 이 생성자를 없애도 된다.
     @Autowired //안붙여도 되긴해 왜냐하면 생성자가 하나라서
+    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) { //이것으로 SRP 원칙 지키게 된다. (책임 분리)
+        this.memberRepository = memberRepository;
+        this.discountPolicy = discountPolicy;
+    }
+    하지만 생성자가 직접 필요할 때에는 생성자를 직접 만들어라.
+    * */
+
+    /*
+    @Autowired //Autowired할 때 같은 타입의 빈이 2개 일때 발생하는 오류로 사용하는 방법중 2번째 방법
+    public OrderServiceImpl(MemberRepository memberRepository, @Qualifier("mainDiscountPolicy") DiscountPolicy discountPolicy) {
+        this.memberRepository = memberRepository;
+        this.discountPolicy = discountPolicy;
+    }*/
+
+    //Autowired할 때 같은 타입의 빈이 2개 일때 발생하는 오류로 사용하는 방법중 3번째 방법 -> @Primary
     public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) { //이것으로 SRP 원칙 지키게 된다. (책임 분리)
         this.memberRepository = memberRepository;
         this.discountPolicy = discountPolicy;
@@ -32,7 +52,9 @@ public class OrderServiceImpl implements OrderService{
     @Override
     public Order createOrder(Long memberId, String itemName, int itemPrice) {
         Member member=memberRepository.findById(memberId);
-        int discountPrice = discountPolicy.discount(member,itemPrice);
+        //int discountPrice = discountPolicy.discount(member,itemPrice);  //중복 타입 빈 없을 때
+        //int discountPrice = rateDiscountPolicy.discount(member,itemPrice); //Autowired 중복 빈 타입으로 인한 1번 째 방법
+        int discountPrice = discountPolicy.discount(member,itemPrice); // 중복 타입 빈 있는데 Qualifier적용시
         return new Order(memberId,itemName,itemPrice,discountPrice);
     }
 
