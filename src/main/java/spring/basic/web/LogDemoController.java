@@ -14,13 +14,14 @@ import javax.servlet.http.HttpServletRequest;
 public class LogDemoController {
 
     private final LogDemoService logDemoService;
-    private final ObjectProvider<MyLogger> myLoggerProvider; //완전한 의존 주입을 지연시키게 해준다.
+    private final MyLogger myLogger; //완전한 의존 주입을 지연시키게 해준다. //다시 Provider삭제
 
     @RequestMapping("log-demo")
     @ResponseBody
     public String lofDemo(HttpServletRequest request){
+        System.out.println("myLogger = " + myLogger.getClass());
         String requestURL = request.getRequestURL().toString();
-        MyLogger myLogger = myLoggerProvider.getObject();
+        //MyLogger myLogger = myLoggerProvider.getObject();
         myLogger.setRequestURL(requestURL);
 
         myLogger.log("controller test");

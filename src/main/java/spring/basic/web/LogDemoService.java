@@ -9,10 +9,10 @@ import spring.basic.common.MyLogger;
 @RequiredArgsConstructor
 public class LogDemoService {
 
-    private final ObjectProvider<MyLogger> myLoggerProvider;
+    private final MyLogger myLogger; //Provider 삭제 - Proxy설정으로 인해서
 
     public void logic(String id) {
-        MyLogger myLogger = myLoggerProvider.getObject();
+        //MyLogger myLogger = myLoggerProvider.getObject(); //Provider 삭제 - Proxy설정으로 인해서
         myLogger.log("service id = "+id);
     }
 }
